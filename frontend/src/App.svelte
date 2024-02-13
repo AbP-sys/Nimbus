@@ -1,0 +1,79 @@
+<script>
+  import {
+    Navbar,
+    NavBrand,
+    NavHamburger,
+    NavUl,
+    NavLi,
+    Label,
+    Input,
+    Button,
+    GradientButton,
+    Alert
+  } from "flowbite-svelte";
+  import { ChevronRightOutline, FolderOutline } from "flowbite-svelte-icons";
+  const { ipcRenderer } = require("electron");
+  let inputPath = "";
+  let invalidPath = false;
+  function openFolderDialog() {
+    ipcRenderer.send("open-folder");
+  }
+
+  function handleFolderSelected(event, selectedFolderPath) {
+    inputPath = selectedFolderPath[0];
+  }
+  ipcRenderer.on("folder-selected", handleFolderSelected);
+
+  const handleSubmit = async () => {
+    const response = await fetch("/api", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json", // Specify the content type
+      },
+      body: JSON.stringify(inputPath), // Data to be sent in the request body
+    });
+    if(response.ok) {
+        invalidPath = false;
+    }
+    else {
+      invalidPath = true;
+    }
+    const data = await response.json();
+  };
+</script>
+
+<Navbar class="px-2 sm:px-4 py-2.5 fixed w-full z-20 top-0 start-0 border-b">
+  <NavBrand href="/">
+    <img src="/nimbus-logo.png" class="me-3 h-6 sm:h-9" alt="Nimbus" />
+  </NavBrand>
+  <NavHamburger />
+  <NavUl>
+    <NavLi href="/">Home</NavLi>
+    <NavLi href="/about">About</NavLi>
+    <NavLi href="/docs/components/navbar">Navbar</NavLi>
+    <NavLi href="/pricing">Pricing</NavLi>
+    <NavLi href="/contact">Contact</NavLi>
+  </NavUl>
+</Navbar>
+<div class="flex">
+  <Input id="folder-input" placeholder="Enter folder path" bind:value={inputPath} />
+  <Button
+    color="alternative"
+    class="bg-transparent !p-1 border-transparent"
+    on:click={openFolderDialog}
+  >
+    <FolderOutline class="w-5 h-5" />
+  </Button>
+</div>
+<GradientButton on:click={handleSubmit} color="cyanToBlue">
+  <ChevronRightOutline class="w-3.5 h-3.5 me-2" /> Upload
+</GradientButton>
+
+{#if invalidPath}
+<Alert>
+  <span class="font-medium">Invalid path</span>
+</Alert>
+{/if}
+
+<style>
+</style>

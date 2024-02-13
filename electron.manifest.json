@@ -1,0 +1,38 @@
+{
+  "executable": "Nimbus",
+  "splashscreen": {
+    "imageFile": ""
+  },
+  "name": "Nimbus",
+  "author": "",
+  "singleInstance": false,
+  "environment": "Production",
+  "build": {
+    "appId": "com.Nimbus.app",
+    "productName": "Nimbus",
+    "copyright": "Copyright © 2020",
+    "buildVersion": "1.0.0",
+    "win": {
+            "icon": "../../../wwwroot/nimbus-icon.ico"
+        },
+    "compression": "maximum",
+    "directories": {
+      "output": "../../../bin/Desktop"
+    },
+    "extraResources": [
+      {
+        "from": "./bin",
+        "to": "bin",
+        "filter": [ "**/*" ]
+      }
+    ],
+    "files": [
+      {
+        "from": "./ElectronHostHook/node_modules",
+        "to": "ElectronHostHook/node_modules",
+        "filter": [ "**/*" ]
+      },
+      "**/*"
+    ]
+  }
+}
