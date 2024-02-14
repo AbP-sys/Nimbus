@@ -25,7 +25,7 @@
   ipcRenderer.on("folder-selected", handleFolderSelected);
 
   const handleSubmit = async () => {
-    const response = await fetch("/api", {
+    const response = await fetch("/upload", {
       method: "POST",
       headers: {
         "Content-Type": "application/json", // Specify the content type
