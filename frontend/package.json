@@ -21,6 +21,7 @@
     "vite": "^5.1.0"
   },
   "dependencies": {
-    "electron": "^28.2.2"
+    "electron": "^28.2.2",
+    "svelte-spa-router": "^4.0.1"
   }
 }
