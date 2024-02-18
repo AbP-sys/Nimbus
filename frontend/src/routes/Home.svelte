@@ -1,57 +1,66 @@
 <script>
-    import {
-    Input,
-    Button,
-    GradientButton,
-    Alert
-  } from "flowbite-svelte";
-  import { ChevronRightOutline, FolderOutline, HomeOutline } from "flowbite-svelte-icons";
-    const { ipcRenderer } = require("electron");
-let inputPath = "";
-  let invalidPath = false;
-  function openFolderDialog() {
-    ipcRenderer.send("open-folder");
-  }
-
-  function handleFolderSelected(event, selectedFolderPath) {
-    inputPath = selectedFolderPath[0];
-  }
-  ipcRenderer.on("folder-selected", handleFolderSelected);
-
-  const handleSubmit = async () => {
-    const response = await fetch("/upload", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json", // Specify the content type
-      },
-      body: JSON.stringify(inputPath), // Data to be sent in the request body
-    });
-    if(response.ok) {
-        invalidPath = false;
-    }
-    else {
-      invalidPath = true;
-    }
-    const data = await response.json();
-  };
+  import { Gallery } from "flowbite-svelte";
+  const images1 = [
+    {
+      alt: "erbology",
+      src: "https://flowbite.s3.amazonaws.com/docs/gallery/masonry/image.jpg",
+    },
+    {
+      alt: "shoes",
+      src: "https://flowbite.s3.amazonaws.com/docs/gallery/masonry/image-1.jpg",
+    },
+    {
+      alt: "small bag",
+      src: "https://flowbite.s3.amazonaws.com/docs/gallery/masonry/image-2.jpg",
+    },
+  ];
+  const images2 = [
+    {
+      alt: "plants",
+      src: "https://flowbite.s3.amazonaws.com/docs/gallery/masonry/image-3.jpg",
+    },
+    {
+      alt: "watch",
+      src: "https://flowbite.s3.amazonaws.com/docs/gallery/masonry/image-4.jpg",
+    },
+    {
+      alt: "shoe",
+      src: "https://flowbite.s3.amazonaws.com/docs/gallery/masonry/image-5.jpg",
+    },
+  ];
+  const images3 = [
+    {
+      alt: "cream",
+      src: "https://flowbite.s3.amazonaws.com/docs/gallery/masonry/image-6.jpg",
+    },
+    {
+      alt: "small bag",
+      src: "https://flowbite.s3.amazonaws.com/docs/gallery/masonry/image-7.jpg",
+    },
+    {
+      alt: "lamp",
+      src: "https://flowbite.s3.amazonaws.com/docs/gallery/masonry/image-8.jpg",
+    },
+  ];
+  const images4 = [
+    {
+      alt: "toiletbag",
+      src: "https://flowbite.s3.amazonaws.com/docs/gallery/masonry/image-9.jpg",
+    },
+    {
+      alt: "playstation",
+      src: "https://flowbite.s3.amazonaws.com/docs/gallery/masonry/image-10.jpg",
+    },
+    {
+      alt: "bag",
+      src: "https://flowbite.s3.amazonaws.com/docs/gallery/masonry/image-11.jpg",
+    },
+  ];
 </script>
 
-<div class="flex">
-  <Input id="folder-input" placeholder="Enter folder path" bind:value={inputPath} />
-  <Button
-    color="alternative"
-    class="bg-transparent !p-1 border-transparent"
-    on:click={openFolderDialog}
-  >
-    <FolderOutline class="w-5 h-5" />
-  </Button>
-</div>
-<GradientButton on:click={handleSubmit} color="cyanToBlue">
-  <ChevronRightOutline class="w-3.5 h-3.5 me-2" /> Upload
-</GradientButton>
-
-{#if invalidPath}
-<Alert>
-  <span class="font-medium">Invalid path</span>
-</Alert>
-{/if}
+<Gallery class="gap-4 grid-cols-2 md:grid-cols-4">
+  <Gallery items={images1} />
+  <Gallery items={images2} />
+  <Gallery items={images3} />
+  <Gallery items={images4} />
+</Gallery>
