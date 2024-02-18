@@ -97,8 +97,6 @@ namespace Nimbus.Services
                     encryptionKey = Convert.FromBase64String(keyString);
                     initializationVector = Convert.FromBase64String(ivString);
                 }
-                Console.WriteLine($"{Convert.ToBase64String(encryptionKey)}");
-                Console.WriteLine($"{Convert.ToBase64String(initializationVector)}");
                 // Get all files with the specified extension in the root directory
                 var photoFiles = Directory.GetFiles(rootPath);
                 Directory.CreateDirectory(".temp");
