@@ -1,3 +1,5 @@
+using System;
+using System.IO;
 using System.Security.Cryptography;
 
 namespace Nimbus.Services.Encryption
@@ -24,7 +26,7 @@ namespace Nimbus.Services.Encryption
             return outputFile;
         }
 
-        public static string DecryptFile(String inputFile, byte[] key, byte[] iv)
+        public static string DecryptFile(string inputFile, byte[] key, byte[] iv)
         {
             string outputFile = inputFile.Substring(0, inputFile.Length - 4);
 
@@ -44,7 +46,6 @@ namespace Nimbus.Services.Encryption
             Console.WriteLine($"Decryption complete. Decrypted file saved to: {outputFile}");
             return outputFile;
         }
-
 
     }
 
