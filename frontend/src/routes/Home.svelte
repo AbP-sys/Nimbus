@@ -1,66 +1,49 @@
 <script>
-  import { Gallery } from "flowbite-svelte";
-  const images1 = [
-    {
-      alt: "erbology",
-      src: "https://flowbite.s3.amazonaws.com/docs/gallery/masonry/image.jpg",
-    },
-    {
-      alt: "shoes",
-      src: "https://flowbite.s3.amazonaws.com/docs/gallery/masonry/image-1.jpg",
-    },
-    {
-      alt: "small bag",
-      src: "https://flowbite.s3.amazonaws.com/docs/gallery/masonry/image-2.jpg",
-    },
-  ];
-  const images2 = [
-    {
-      alt: "plants",
-      src: "https://flowbite.s3.amazonaws.com/docs/gallery/masonry/image-3.jpg",
-    },
-    {
-      alt: "watch",
-      src: "https://flowbite.s3.amazonaws.com/docs/gallery/masonry/image-4.jpg",
-    },
-    {
-      alt: "shoe",
-      src: "https://flowbite.s3.amazonaws.com/docs/gallery/masonry/image-5.jpg",
-    },
-  ];
-  const images3 = [
-    {
-      alt: "cream",
-      src: "https://flowbite.s3.amazonaws.com/docs/gallery/masonry/image-6.jpg",
-    },
-    {
-      alt: "small bag",
-      src: "https://flowbite.s3.amazonaws.com/docs/gallery/masonry/image-7.jpg",
-    },
-    {
-      alt: "lamp",
-      src: "https://flowbite.s3.amazonaws.com/docs/gallery/masonry/image-8.jpg",
-    },
-  ];
-  const images4 = [
-    {
-      alt: "toiletbag",
-      src: "https://flowbite.s3.amazonaws.com/docs/gallery/masonry/image-9.jpg",
-    },
-    {
-      alt: "playstation",
-      src: "https://flowbite.s3.amazonaws.com/docs/gallery/masonry/image-10.jpg",
-    },
-    {
-      alt: "bag",
-      src: "https://flowbite.s3.amazonaws.com/docs/gallery/masonry/image-11.jpg",
-    },
-  ];
+  import { Spinner } from "flowbite-svelte";
+  import { onMount } from "svelte";
+  import Gallery from "svelte-image-gallery";
+
+  function handleClick(e) {
+    console.log(e.detail.src);
+  }
+  let images = [];
+  let images1 = [];
+  let images2 = [];
+  let images3 = [];
+  let images4 = [];
+  let isLoading = false;
+
+  onMount(async () => {
+    try {
+      isLoading = true;
+      const response = await fetch("/home");
+      const data = await response.json();
+      console.log(data);
+      images = data.map((item) => ({ src: String(item) }));
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+    for (let i = 0; i < images.length; i++) {
+      if (i % 4 === 0) {
+        images1.push(images[i]);
+      } else if (i % 4 === 1) {
+        images2.push(images[i]);
+      } else if (i % 4 === 2) {
+        images3.push(images[i]);
+      } else {
+        images4.push(images[i]);
+      }
+    }
+    isLoading = false;
+  });
 </script>
 
-<Gallery class="gap-4 grid-cols-2 md:grid-cols-4">
-  <Gallery items={images1} />
-  <Gallery items={images2} />
-  <Gallery items={images3} />
-  <Gallery items={images4} />
+{#if isLoading}
+  <Spinner />
+{/if}
+
+<Gallery loading="eager" on:click={handleClick}>
+  {#each images as img}
+    <img src={img["src"]} alt="pic" />
+  {/each}
 </Gallery>

@@ -1,9 +1,12 @@
 using System;
 using System.IO;
+using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
 using ElectronNET.API;
 using Microsoft.Extensions.Logging.Abstractions;
+using Newtonsoft.Json.Linq;
 using Nimbus.Interfaces;
 using Nimbus.Services.Encryption;
 using TL;
@@ -131,6 +134,39 @@ namespace Nimbus.Services
                 Console.WriteLine($"ENV variable not found: {e.Message}. Please generate encryption keys using the installation script");
             }
 
+        }
+
+        public async Task<JArray> DownloadFiles(int offset = 0)
+        {
+            Messages_MessagesBase messages = await client.Messages_GetHistory(InputPeer.Self, add_offset: offset, limit: 20);
+            JArray results = new();
+            foreach (var message in messages.Messages)
+            {
+                if (message is Message msg && msg.media is MessageMediaDocument media)
+                {
+                    // Get the document object and its attributes
+                    var document = media.document as Document;
+                    var attributes = document.attributes;
+
+                    // Get the file name and size of the document
+                    var fileName = ".temp/" + document.Filename;
+                    var fileSize = document.size / (1024 * 1024);
+                    Console.WriteLine($"Found document: {fileName} ({fileSize} MB)");
+                    results.Add(document.Filename);
+                    if (File.Exists(fileName))
+                        continue;
+                    using (FileStream fileStreamWrite = new FileStream(fileName, FileMode.Create, FileAccess.Write))
+                    {
+                        await client.DownloadFileAsync(document, fileStreamWrite);
+                    }
+                }
+                else
+                {
+                    Console.WriteLine($"Unable to download message: {message.ID} sent on {message.Date}");
+                }
+
+            }
+            return results;
         }
     }
 }

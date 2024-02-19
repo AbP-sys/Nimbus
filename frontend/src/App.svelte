@@ -27,7 +27,7 @@
   <NavUl>
     <NavLi href="/">Home</NavLi>
     <NavLi href="/#/upload">Upload</NavLi>
-    <NavLi href="/">Pricing</NavLi>
+    <NavLi href="/">About</NavLi>
     <NavLi href="/">Contact</NavLi>
     <NavLi href="/#/login">Log In</NavLi>
   </NavUl>
