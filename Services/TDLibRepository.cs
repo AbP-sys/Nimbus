@@ -18,6 +18,11 @@ namespace Nimbus.Services
     {
         private static Client client;
         private string? _phone_number;
+        private string? keyString;
+        private string? ivString;
+        byte[] encryptionKey;
+        byte[] initializationVector;
+        private string tempPath;
 
         public TDLibRepository(int? apiID, string? apiHash, string? phoneNumber)
         {
@@ -26,6 +31,8 @@ namespace Nimbus.Services
                 client = new WTelegram.Client((int)apiID, apiHash);
                 _phone_number = phoneNumber;
             }
+            Directory.CreateDirectory(".temp");
+            tempPath = ".temp/";
         }
 
         public async Task<bool> InitClient(int apiID, string apiHash, string phoneNumber, bool getVerificationCode)
@@ -38,6 +45,22 @@ namespace Nimbus.Services
         public async Task<bool> InitClient(bool getVerificationCode)
         {
             bool login = await DoLogin(_phone_number, getVerificationCode);
+            try
+            {
+                keyString = System.Environment.GetEnvironmentVariable("KEY_STRING") ?? throw new NullReferenceException("KEY_STRING is null");
+                ivString = System.Environment.GetEnvironmentVariable("IV_STRING") ?? throw new NullReferenceException("IV_STRING is null");
+                using (var aes = Aes.Create())
+                {
+                    encryptionKey = Convert.FromBase64String(keyString);
+                    initializationVector = Convert.FromBase64String(ivString);
+                }
+            }
+            catch (NullReferenceException e)
+            {
+                Console.WriteLine($"ENV variable not found: {e.Message}. Please generate encryption keys using the installation script");
+            }
+
+
             return login;
         }
 
@@ -87,53 +110,22 @@ namespace Nimbus.Services
 
         public async Task UploadFiles(string uploadPath)
         {
-            try
+            var rootPath = uploadPath;
+            // Get all files with the specified extension in the root directory
+            var photoFiles = Directory.GetFiles(rootPath);
+            int i = 0;
+            foreach (var photoFile in photoFiles)
             {
-                var rootPath = uploadPath;
-                string keyString = System.Environment.GetEnvironmentVariable("KEY_STRING") ?? throw new NullReferenceException("KEY_STRING is null");
-                string ivString = System.Environment.GetEnvironmentVariable("IV_STRING") ?? throw new NullReferenceException("IV_STRING is null");
-                byte[] encryptionKey;
-                byte[] initializationVector;
+                var fileName = Path.GetFileName(photoFile);
+                Console.WriteLine("Encrypting...");
+                var encryptedFile = AESEncryptor.EncryptFile(photoFile, encryptionKey, initializationVector);
 
-                using (var aes = Aes.Create())
-                {
-                    encryptionKey = Convert.FromBase64String(keyString);
-                    initializationVector = Convert.FromBase64String(ivString);
-                }
-                // Get all files with the specified extension in the root directory
-                var photoFiles = Directory.GetFiles(rootPath);
-                Directory.CreateDirectory(".temp");
-                int i = 0;
-                foreach (var photoFile in photoFiles)
-                {
-                    var fileName = Path.GetFileName(photoFile);
-                    Console.WriteLine("Encrypting...");
-                    var encryptedFile = AESEncryptor.EncryptFile(photoFile, encryptionKey, initializationVector);
+                Console.WriteLine($"Sending document: {fileName}");
 
-                    Console.WriteLine($"Sending document: {fileName}");
-
-                    var inputFile = await client.UploadFileAsync(encryptedFile);
-                    await client.SendMediaAsync(InputPeer.Self, "Here is the photo", inputFile);
-                    Console.WriteLine($"Uploaded {++i} / {photoFiles.Length}");
-
-
-                }
-
-                var encFiles = Directory.GetFiles(Directory.GetCurrentDirectory() + "/.temp", "*.enc");
-                foreach (var photoFile in encFiles)
-                {
-                    var fileName = Path.GetFileName(photoFile);
-                    Console.WriteLine("Decrypting..." + fileName);
-                    var decryptedFile = AESEncryptor.DecryptFile(photoFile, encryptionKey, initializationVector);
-
-                    Console.WriteLine($"Sending document: {fileName}");
-                }
+                var inputFile = await client.UploadFileAsync(encryptedFile);
+                await client.SendMediaAsync(InputPeer.Self, "Here is the photo", inputFile);
+                Console.WriteLine($"Uploaded {++i} / {photoFiles.Length}");
             }
-            catch (NullReferenceException e)
-            {
-                Console.WriteLine($"ENV variable not found: {e.Message}. Please generate encryption keys using the installation script");
-            }
-
         }
 
         public async Task<JArray> DownloadFiles(int offset = 0)
@@ -148,17 +140,26 @@ namespace Nimbus.Services
                     var document = media.document as Document;
                     var attributes = document.attributes;
 
-                    // Get the file name and size of the document
-                    var fileName = ".temp/" + document.Filename;
+
+                    var fileName = document.Filename; //document.Filename ends with .enc
+                    var decryptedFileName = document.Filename.Substring(0, document.Filename.Length - 4);
                     var fileSize = document.size / (1024 * 1024);
-                    Console.WriteLine($"Found document: {fileName} ({fileSize} MB)");
-                    results.Add(document.Filename);
-                    if (File.Exists(fileName))
+                    Console.WriteLine($"Processing document: {fileName} ({fileSize} MB)");
+
+                    if (File.Exists(tempPath + decryptedFileName))
+                    {
+                        results.Add(Path.GetFileName(decryptedFileName));
                         continue;
-                    using (FileStream fileStreamWrite = new FileStream(fileName, FileMode.Create, FileAccess.Write))
+                    }
+
+                    using (FileStream fileStreamWrite = new FileStream(tempPath + fileName, FileMode.Create, FileAccess.Write))
                     {
                         await client.DownloadFileAsync(document, fileStreamWrite);
                     }
+
+                    Console.WriteLine("Decrypting..." + document.Filename);
+                    var decryptedFile = AESEncryptor.DecryptFile(tempPath + fileName, encryptionKey, initializationVector);
+                    results.Add(Path.GetFileName(decryptedFile));
                 }
                 else
                 {

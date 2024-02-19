@@ -47,3 +47,9 @@
     <img src={img["src"]} alt="pic" />
   {/each}
 </Gallery>
+
+<style>
+  img {
+    border-radius: 1rem;
+  }
+</style>
