@@ -128,9 +128,9 @@ namespace Nimbus.Services
             }
         }
 
-        public async Task<JArray> DownloadFiles(int offset = 0)
+        public async Task<JArray> DownloadFiles(int offset = 0, int fetchAtOnce = 10)
         {
-            Messages_MessagesBase messages = await client.Messages_GetHistory(InputPeer.Self, add_offset: offset, limit: 20);
+            Messages_MessagesBase messages = await client.Messages_GetHistory(InputPeer.Self, add_offset: offset, limit: fetchAtOnce);
             JArray results = new();
             foreach (var message in messages.Messages)
             {

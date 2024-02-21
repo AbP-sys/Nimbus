@@ -8,6 +8,6 @@ namespace Nimbus.Interfaces
         public Task<bool> InitClient(bool sendCode);
         public Task<bool> InitClient(int apiID, string apiHash, string phoneNumber, bool sendVerificationCode);
         public Task UploadFiles(string uploadPath);
-        public Task<JArray> DownloadFiles(int offset = 0);
+        public Task<JArray> DownloadFiles(int offset = 0, int fetchAtOnce = 10);
     }
 }

@@ -17,6 +17,8 @@ namespace Nimbus.Controllers
 
         private readonly ITDLibRepository _tdLibRepository;
         private readonly string TempDirectoryPath = Path.Combine(Directory.GetCurrentDirectory(), ".temp");
+        private static int offset = 0;
+        private const int fetchAtOnce = 10;
         public HomeController(ITDLibRepository tdLibRepository)
         {
             _tdLibRepository = tdLibRepository;
@@ -28,7 +30,10 @@ namespace Nimbus.Controllers
             bool login = await _tdLibRepository.InitClient(false);
             JArray results = new();
             if (login)
-                results = await _tdLibRepository.DownloadFiles();
+            {
+                results = await _tdLibRepository.DownloadFiles(offset, fetchAtOnce);
+                offset += fetchAtOnce;
+            }
             else
                 Console.WriteLine("Please login");
             return Ok(results.ToString());

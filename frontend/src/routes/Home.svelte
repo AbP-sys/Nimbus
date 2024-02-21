@@ -7,35 +7,42 @@
     console.log(e.detail.src);
   }
   let images = [];
-  let images1 = [];
-  let images2 = [];
-  let images3 = [];
-  let images4 = [];
   let isLoading = false;
+  let fetchFurther = false;
+  let fetchedPhotos = [];
 
-  onMount(async () => {
+  const fetchPhotos = async () => {
     try {
       isLoading = true;
       const response = await fetch("/home");
       const data = await response.json();
-      console.log(data);
-      images = data.map((item) => ({ src: String(item) }));
+      fetchedPhotos = data.map((item) => ({ src: String(item) }));
+      images = images.concat(fetchedPhotos);
     } catch (error) {
       console.error("Error fetching data:", error);
     }
-    for (let i = 0; i < images.length; i++) {
-      if (i % 4 === 0) {
-        images1.push(images[i]);
-      } else if (i % 4 === 1) {
-        images2.push(images[i]);
-      } else if (i % 4 === 2) {
-        images3.push(images[i]);
-      } else {
-        images4.push(images[i]);
-      }
-    }
     isLoading = false;
-  });
+    fetchFurther = true;
+  };
+
+  onMount(fetchPhotos);
+
+  window.onscroll = () => {
+    console.log(
+      window.innerHeight,
+      document.documentElement.scrollTop,
+      document.documentElement.offsetHeight
+    );
+    if (
+      window.innerHeight + document.documentElement.scrollTop >=
+        document.documentElement.offsetHeight &&
+      fetchFurther
+    ) {
+      console.log("here");
+      fetchFurther = false;
+      fetchPhotos();
+    }
+  };
 </script>
 
 {#if isLoading}
