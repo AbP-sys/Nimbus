@@ -3,6 +3,7 @@
   import Home from "./routes/Home.svelte";
   import Login from "./routes/Login.svelte";
   import Upload from "./routes/Upload.svelte";
+  import Drive from "./routes/Drive.svelte";
   import {
     Navbar,
     NavBrand,
@@ -13,6 +14,7 @@
 
   let routes = {
     "/": Home,
+    "/drive": Drive,
     "/upload": Upload,
     "/login": Login,
     "*": Login,
@@ -26,9 +28,9 @@
   <NavHamburger />
   <NavUl>
     <NavLi href="/">Home</NavLi>
+    <NavLi href="/#/drive">Drive</NavLi>
     <NavLi href="/#/upload">Upload</NavLi>
     <NavLi href="/">About</NavLi>
-    <NavLi href="/">Contact</NavLi>
     <NavLi href="/#/login">Log In</NavLi>
   </NavUl>
 </Navbar>
