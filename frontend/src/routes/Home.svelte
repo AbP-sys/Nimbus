@@ -28,11 +28,6 @@
   onMount(fetchPhotos);
 
   window.onscroll = () => {
-    console.log(
-      window.innerHeight,
-      document.documentElement.scrollTop,
-      document.documentElement.offsetHeight
-    );
     if (
       window.innerHeight + document.documentElement.scrollTop >=
         document.documentElement.offsetHeight &&

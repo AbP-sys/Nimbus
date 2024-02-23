@@ -5,31 +5,33 @@
 
   let fileList = [];
   let children = [];
-
-  // Fetch data from the endpoint
-  async function fetchData() {
-    const response = await fetch("/drive/");
+  let path = "";
+  let segments = [];
+  $: segments = path.split("/").filter(Boolean);
+  async function fetchData(folder) {
+    path += folder;
+    console.log(path);
+    const response = await fetch("/drive" + path);
     const data = await response.json();
     fileList = data;
     children = fileList.children;
-    console.log(children);
   }
 
-  // Call fetchData when the component is mounted
   onMount(() => {
-    fetchData();
+    fetchData(path);
   });
 </script>
 
-<Breadcrumb aria-label="Default breadcrumb example">
-  <BreadcrumbItem href="/" home>Home</BreadcrumbItem>
-  <BreadcrumbItem href="/">Projects</BreadcrumbItem>
-  <BreadcrumbItem>Flowbite Svelte</BreadcrumbItem>
+<Breadcrumb aria-label="Default breadcrumb">
+  <BreadcrumbItem href="/" home>root</BreadcrumbItem>
+  {#each segments as segment (segment)}
+    <BreadcrumbItem>{segment}</BreadcrumbItem>
+  {/each}
 </Breadcrumb>
 
 <div class="flex p-4">
   {#each children as item (item.name)}
-    <Card class="items-center">
+    <Card on:click={() => fetchData("/" + item.name)} class="items-center">
       {#if item.isFolder}
         <FolderOutline size="xl" />
       {:else}
