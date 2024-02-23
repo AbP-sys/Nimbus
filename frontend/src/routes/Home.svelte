@@ -9,15 +9,15 @@
   let images = [];
   let isLoading = false;
   let fetchFurther = false;
-  let fetchedPhotos = [];
+  let results = [];
 
   const fetchPhotos = async () => {
     try {
       isLoading = true;
       const response = await fetch("/home");
       const data = await response.json();
-      fetchedPhotos = data.map((item) => ({ src: String(item) }));
-      images = images.concat(fetchedPhotos);
+      results = data.map((item) => ({ src: String(item) }));
+      images = images.concat(results);
     } catch (error) {
       console.error("Error fetching data:", error);
     }
