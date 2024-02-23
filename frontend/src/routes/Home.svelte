@@ -10,14 +10,16 @@
   let isLoading = false;
   let fetchFurther = false;
   let results = [];
+  let offset = 0;
 
   const fetchPhotos = async () => {
     try {
       isLoading = true;
-      const response = await fetch("/home");
+      const response = await fetch(`/home&${offset}`);
       const data = await response.json();
       results = data.map((item) => ({ src: String(item) }));
       images = images.concat(results);
+      offset += 10;
     } catch (error) {
       console.error("Error fetching data:", error);
     }
