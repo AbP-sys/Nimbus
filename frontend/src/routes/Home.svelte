@@ -7,14 +7,12 @@
     console.log(e.detail.src);
   }
   let images = [];
-  let isLoading = false;
   let fetchFurther = false;
   let results = [];
   let offset = 0;
 
   const fetchPhotos = async () => {
     try {
-      isLoading = true;
       const response = await fetch(`/home&${offset}`);
       const data = await response.json();
       results = data.map((item) => ({ src: String(item) }));
@@ -23,11 +21,8 @@
     } catch (error) {
       console.error("Error fetching data:", error);
     }
-    isLoading = false;
     fetchFurther = true;
   };
-
-  onMount(fetchPhotos);
 
   window.onscroll = () => {
     if (
@@ -39,18 +34,22 @@
       fetchFurther = false;
       fetchPhotos();
     }
+
+    onMount(fetchPhotos);
   };
 </script>
 
-{#if isLoading}
+{#await fetchPhotos()}
   <Spinner />
-{/if}
-
-<Gallery loading="eager" on:click={handleClick}>
-  {#each images as img}
-    <img src={img["src"]} alt="pic" />
-  {/each}
-</Gallery>
+{:then data}
+  <Gallery loading="eager" on:click={handleClick}>
+    {#each images as img}
+      <img src={img["src"]} alt="pic" />
+    {/each}
+  </Gallery>
+{:catch error}
+  <p>Unable to fetch photos</p>
+{/await}
 
 <style>
   img {
